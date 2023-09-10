@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
 import 'package:todo_provider/models/todo_model.dart';
 import 'package:todo_provider/providers/todo_filter.dart';
 import 'package:todo_provider/providers/todo_list.dart';
@@ -30,47 +31,41 @@ class FilteredTodosState extends Equatable {
   }
 }
 
-class FilteredTodos with ChangeNotifier {
- // FilteredTodosState _state = FilteredTodosState.initial();
-  late FilteredTodosState _state;
-  final List<Todo> initialFilteredTodos;
-  FilteredTodos({
-    required this.initialFilteredTodos,
-  }) {
-    _state = FilteredTodosState(filteredTodos: initialFilteredTodos);
-  }
-  FilteredTodosState get state => _state;
+class FilteredTodos {
+  final TodoList todoList;
+  final TodoFilter todoFilter;
+  final TodoSearch todoSearch;
 
-  void update(
-    TodoFilter todoFilter,
-    TodoSearch todoSearch,
-    TodoList todoList,
-  ) {
-    List<Todo> filteredTodos;
+  FilteredTodos({
+    required this.todoList,
+    required this.todoFilter,
+    required this.todoSearch,
+  });
+  FilteredTodosState get state {
+    List<Todo> _filteredTodos;
 
     switch (todoFilter.state.filter) {
       case Filter.active:
-        filteredTodos =
+        _filteredTodos =
             todoList.state.todos.where((Todo todo) => !todo.completed).toList();
         break;
       case Filter.completed:
-        filteredTodos =
+        _filteredTodos =
             todoList.state.todos.where((Todo todo) => todo.completed).toList();
         break;
       case Filter.all:
       default:
-        filteredTodos = todoList.state.todos;
+        _filteredTodos = todoList.state.todos;
         break;
     }
 
     if (todoSearch.state.searchTerm.isNotEmpty) {
-      filteredTodos = filteredTodos
+      _filteredTodos = _filteredTodos
           .where((Todo todo) =>
               todo.desc.toLowerCase().contains(todoSearch.state.searchTerm))
           .toList();
     }
 
-    _state = _state.copyWith(filteredTodos: filteredTodos);
-    notifyListeners();
+    return FilteredTodosState(filteredTodos: _filteredTodos);
   }
 }
